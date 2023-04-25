@@ -11,6 +11,10 @@ AMyGameModeBase::AMyGameModeBase()
 	PlayerControllerClass = AMyPlayerController::StaticClass();
 	DefaultPawnClass = AMyPawn::StaticClass();
 
-
+	/*if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red, TEXT("진호 잡아와"));
+	}*/
+	
 
 }
