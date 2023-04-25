@@ -20,8 +20,15 @@ AMyPawn::AMyPawn()
 	RootComponent = Box;
 
 	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Body"));
-	Body->SetupAttachment(Body);
+	Body->SetupAttachment(Box);
 
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>
+		SM_P38_Body(TEXT("/Script/Engine.StaticMesh'/Game/P38/Meshes/SM_P38_Body.SM_P38_Body'"));
+	if (SM_P38_Body.Succeeded())
+	{
+		Body->SetStaticMesh(SM_P38_Body.Object);
+	}
+	
 
 	Left = CreateDefaultSubobject<UPropellerComponent>(TEXT("Left"));
 	Left->SetupAttachment(Body);
@@ -29,18 +36,34 @@ AMyPawn::AMyPawn()
 	Right = CreateDefaultSubobject<UPropellerComponent>(TEXT("Right"));
 	Right->SetupAttachment(Body);
 
-	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
-	Arrow->SetupAttachment(Body);
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>
+		SM_P38_Propeller(TEXT("/Script/Engine.StaticMesh'/Game/P38/Meshes/SM_P38_Propeller.SM_P38_Propeller'"));
+	if (SM_P38_Propeller.Succeeded())
+	{
+		Left->SetStaticMesh(SM_P38_Propeller.Object);
+		Left->AddLocalOffset(FVector(37.5f, -21.0f, 1.17f));
+		Right->SetStaticMesh(SM_P38_Propeller.Object);
+		Right->AddLocalOffset(FVector(37.5f, 21.0f, 1.17f));
+	}
+		
 	
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
-	SpringArm->SetupAttachment(Body);
+	SpringArm->SetupAttachment(Box);
+	SpringArm->TargetArmLength = 150.0f;
+	SpringArm->bEnableCameraLag = true;
+	SpringArm->bEnableCameraRotationLag = true;
+
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
+	Arrow = CreateDefaultSubobject<UArrowComponent>(TEXT("Arrow"));
+	Arrow->SetupAttachment(Box);
+	Arrow->AddLocalOffset(FVector(100, 0, 0));
+
 	Movement = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Movement"));
-
-
+	Movement->MaxSpeed = 2000.0f;
 }
 
 // Called when the game starts or when spawned
@@ -55,6 +78,7 @@ void AMyPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	AddMovementInput(GetActorForwardVector());
 }
 
 // Called to bind functionality to input
